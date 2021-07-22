@@ -1,19 +1,20 @@
-plugins { id("io.vacco.common-build") version "0.5.3" }
-
 group = "io.vacco.java-express"
 version = "0.2.1"
 
-configure<io.vacco.common.CbPluginProfileExtension> {
-  addJ8Spec(); addPmd(); addSpotBugs()
-  setPublishingUrlTransform { repo -> "${repo.url}/${project.name}" }
-  sharedLibrary()
+plugins {
+    id("java")
 }
 
-configure<JavaPluginExtension> {
-  sourceCompatibility = JavaVersion.VERSION_1_8
-  targetCompatibility = JavaVersion.VERSION_1_8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
-  implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("org.slf4j:slf4j-api:1.7.30")
 }
+
