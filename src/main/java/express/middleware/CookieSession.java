@@ -76,7 +76,7 @@ final class CookieSession implements HttpRequestHandler, Filter, FilterTask {
         long current = System.currentTimeMillis();
 
         cookies.forEach((cookieHash, cookie) -> {
-            if (current > cookie.getCreated() + cookie.getMaxAge()) {
+            if (current > cookie.getCreated() + cookie.getMaxAge() * 1000) {
                 cookies.remove(cookieHash);
             }
         });
