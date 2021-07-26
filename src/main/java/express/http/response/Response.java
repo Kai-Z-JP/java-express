@@ -27,20 +27,15 @@ public class Response {
     private final HttpExchange httpExchange;
     private final OutputStream body;
     private final Headers headers;
-    private final Logger logger;
+    private final Logger logger = Logger.getLogger(getClass().getSimpleName());
 
-    private String contentType;
-    private boolean isClose;
-    private long contentLength;
-    private int status;
+    // Initialize with default data
+    private String contentType = MediaType._txt.getMIME();
+    private boolean isClose = false;
+    private long contentLength = 0;
+    private int status = 200;
 
     {
-        // Initialize with default data
-        this.contentType = MediaType._txt.getMIME();
-        this.isClose = false;
-        this.contentLength = 0;
-        this.status = 200;
-        this.logger = Logger.getLogger(getClass().getSimpleName());
         this.logger.setUseParentHandlers(false); // Disable default console log
     }
 
@@ -171,13 +166,13 @@ public class Response {
         }
 
         if (isClosed()) return;
-        byte[] data = s.getBytes();
+        byte[] data = s.getBytes(StandardCharsets.UTF_8);
 
         this.contentLength = data.length;
         sendHeaders();
 
         try {
-            this.body.write(s.getBytes(StandardCharsets.UTF_8));
+            this.body.write(data);
         } catch (IOException e) {
             logger.log(Level.INFO, "Failed to write charsequence to client.", e);
         }
