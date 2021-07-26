@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -167,7 +168,7 @@ public class Response {
         sendHeaders();
 
         try {
-            this.body.write(s.getBytes());
+            this.body.write(s.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             log.error("Failed to write char sequence to client.",e );
         }
