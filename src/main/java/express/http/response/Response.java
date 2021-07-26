@@ -6,8 +6,6 @@ import express.http.Cookie;
 import express.utils.MediaType;
 import express.utils.Status;
 import express.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Simon Reinisch
@@ -24,16 +24,25 @@ import java.util.List;
  */
 public class Response {
 
-    private static final Logger log = LoggerFactory.getLogger(Response.class);
-
     private final HttpExchange httpExchange;
     private final OutputStream body;
     private final Headers headers;
+    private final Logger logger;
 
-    private String contentType = MediaType._txt.getMIME();
-    private boolean isClose = false;
-    private long contentLength = 0;
-    private int status = 200;
+    private String contentType;
+    private boolean isClose;
+    private long contentLength;
+    private int status;
+
+    {
+        // Initialize with default data
+        this.contentType = MediaType._txt.getMIME();
+        this.isClose = false;
+        this.contentLength = 0;
+        this.status = 200;
+        this.logger = Logger.getLogger(getClass().getSimpleName());
+        this.logger.setUseParentHandlers(false); // Disable default console log
+    }
 
     public Response(HttpExchange exchange) {
         this.httpExchange = exchange;
@@ -170,7 +179,7 @@ public class Response {
         try {
             this.body.write(s.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
-            log.error("Failed to write char sequence to client.",e );
+            logger.log(Level.INFO, "Failed to write charsequence to client.", e);
         }
 
         close();
@@ -229,7 +238,7 @@ public class Response {
             fis.close();
 
         } catch (IOException e) {
-            log.error("Failed to pipe file to output stream.", e);
+            logger.log(Level.INFO, "Failed to pipe file to outputstream.", e);
             return false;
         } finally {
             close();
@@ -242,7 +251,7 @@ public class Response {
      * Send a byte array as response. Content type will be
      * set to application/octet-streamFrom
      *
-     * @param bytes Byte array
+     * @param bytes Byte arraa
      * @return If operation was successful
      */
     public boolean sendBytes(byte[] bytes) {
@@ -263,7 +272,7 @@ public class Response {
             // Write bytes to body
             this.body.write(bytes);
         } catch (IOException e) {
-            log.error("Failed to pipe file to output stream.", e);
+            logger.log(Level.INFO, "Failed to pipe file to outputstream.", e);
             return false;
         } finally {
             close();
@@ -273,7 +282,7 @@ public class Response {
     }
 
     /**
-     * Streams an input stream to the client.
+     * Streams a inputstream to the client.
      * Requires a contentLength as well as a MediaType
      *
      * @param contentLength Total size
@@ -305,7 +314,7 @@ public class Response {
 
             is.close();
         } catch (IOException e) {
-            log.error("Failed to pipe file to output stream.", e);
+            logger.log(Level.INFO, "Failed to pipe file to outputstream.", e);
             return false;
         } finally {
             close();
@@ -315,10 +324,20 @@ public class Response {
     }
 
     /**
-     * @return If the response is already closed (headers have been sent).
+     * @return If the response is already closed (headers are send).
      */
     public boolean isClosed() {
         return this.isClose;
+    }
+
+    /**
+     * Returns the logger which is concered for this Response object.
+     * There is no default-handler active, if you want to log it you need to set an handler.
+     *
+     * @return The logger from this Response object.
+     */
+    public Logger getLogger() {
+        return logger;
     }
 
     private void sendHeaders() {
@@ -331,7 +350,7 @@ public class Response {
             this.headers.set("Content-Type", contentType);
             this.httpExchange.sendResponseHeaders(status, contentLength);
         } catch (IOException e) {
-            log.error("Failed to send headers.", e);
+            logger.log(Level.INFO, "Failed to send headers.", e);
         }
     }
 
@@ -340,7 +359,7 @@ public class Response {
             this.body.close();
             this.isClose = true;
         } catch (IOException e) {
-            log.error("Failed to close output stream.", e);
+            logger.log(Level.INFO, "Failed to close outputstream.", e);
         }
     }
 
